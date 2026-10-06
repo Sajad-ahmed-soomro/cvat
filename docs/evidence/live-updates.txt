@@ -1,0 +1,11 @@
+# Output of a headless Chrome run against the local stack (page open on /tasks/1/label-counts).
+# Changes are made through the REST API; the connection drop is 'docker stop traefik', the restart is 'docker stop/start cvat_server'.
+[  4.7 s] page live, 8109 annotations across 80 labels
+[  6.1 s] ITEM 8: rectangle saved in 607 ms; page showed 8110 1405 ms after the save was sent
+[  7.7 s] ITEM 8: rectangle deleted, page back to 8109 without a reload
+[  9.1 s] ITEM 9: traefik stopped -> status "Offline, reconnecting…"
+[  9.8 s] ITEM 9: rectangle created inside the docker network while the page was offline; page still shows "8109 annotations across 80 labels"
+[ 12.2 s] ITEM 9: traefik started -> page live again after 2305 ms and shows the missed change: "8110 annotations across 80 labels"
+[ 13.6 s] ITEM 9: missed rectangle deleted, page back to 8109
+[ 14.6 s] ITEM 9: cvat_server stopped -> status "Offline, reconnecting…"
+[ 45.7 s] ITEM 9: cvat_server started -> page live again after 31000 ms, "8109 annotations across 80 labels"

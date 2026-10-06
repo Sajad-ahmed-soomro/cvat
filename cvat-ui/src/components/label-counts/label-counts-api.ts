@@ -27,3 +27,18 @@ export async function fetchTaskLabelCounts(taskId: number): Promise<TaskLabelCou
     );
     return response.data;
 }
+
+export async function fetchLiveTicket(taskId: number): Promise<string> {
+    const response = await core.server.request<{ data: { ticket: string } }>(
+        `${core.config.backendAPI}/test/tasks/${taskId}/label-counts/live-ticket`,
+        { method: 'GET' },
+    );
+    return response.data.ticket;
+}
+
+export function liveSocketURL(taskId: number, ticket: string): string {
+    const url = new URL(`${core.config.backendAPI}/test/tasks/${taskId}/label-counts/live`, window.location.href);
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    url.searchParams.set('ticket', ticket);
+    return url.toString();
+}

@@ -10,6 +10,7 @@ import { Row, Col } from 'antd/lib/grid';
 import Button from 'antd/lib/button';
 import Empty from 'antd/lib/empty';
 import Result from 'antd/lib/result';
+import Tag from 'antd/lib/tag';
 import Text from 'antd/lib/typography/Text';
 import Title from 'antd/lib/typography/Title';
 
@@ -18,6 +19,13 @@ import CVATLoadingSpinner from 'components/common/loading-spinner';
 import LabelCountsChart from './label-counts-chart';
 import LabelCountsTable from './label-counts-table';
 import { TaskLabelCounts, fetchTaskLabelCounts } from './label-counts-api';
+import { LiveStatus, useTaskChanges } from './use-task-changes';
+
+const LIVE_STATUS_TAGS: Record<LiveStatus, { color: string; text: string }> = {
+    [LiveStatus.CONNECTING]: { color: 'processing', text: 'Connecting…' },
+    [LiveStatus.LIVE]: { color: 'success', text: 'Live' },
+    [LiveStatus.OFFLINE]: { color: 'warning', text: 'Offline, reconnecting…' },
+};
 
 function LabelCountsPage(): JSX.Element {
     const taskId = +useParams<{ tid: string }>().tid;
@@ -40,6 +48,8 @@ function LabelCountsPage(): JSX.Element {
     useEffect(() => {
         loadCounts();
     }, [loadCounts]);
+
+    const liveStatus = useTaskChanges(taskId, loadCounts);
 
     let content: JSX.Element;
     if (fetching && !counts && !error) {
@@ -82,7 +92,12 @@ function LabelCountsPage(): JSX.Element {
             </Row>
             <Row justify='center'>
                 <Col span={22} xl={18} xxl={14} className='cvat-label-counts-inner'>
-                    <Title level={4}>{`Annotations per label, task #${taskId}`}</Title>
+                    <Title level={4}>
+                        {`Annotations per label, task #${taskId}`}
+                        <Tag className='cvat-label-counts-live-status' color={LIVE_STATUS_TAGS[liveStatus].color}>
+                            {LIVE_STATUS_TAGS[liveStatus].text}
+                        </Tag>
+                    </Title>
                     {content}
                 </Col>
             </Row>
