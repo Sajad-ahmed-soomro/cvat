@@ -1,0 +1,14 @@
+$ curl -s -w "\nHTTP %{http_code}\n" http://localhost:8080/api/test/tasks/1/label-counts
+{"detail":"Authentication credentials were not provided."}
+HTTP 401
+
+$ curl -s -u outsider:*** -w "\nHTTP %{http_code}\n" http://localhost:8080/api/test/tasks/1/label-counts   # task 1 owned by admin, outsider has no role on it
+{"detail":"You do not have permission to perform this action."}
+HTTP 403
+
+$ curl -s -u outsider:*** -w "\nHTTP %{http_code}\n" http://localhost:8080/api/test/tasks/2/label-counts   # outsider is the assignee of task 2
+{"task_id":2,"total":0,"labels":[{"id":82,"name":"car","color":"#2080c0","count":0},{"id":81,"name":"person","color":"#c06060","count":0}]}
+HTTP 200
+
+$ curl -s -u admin:*** -o /dev/null -w "HTTP %{http_code}\n" http://localhost:8080/api/test/tasks/1/label-counts
+HTTP 200
