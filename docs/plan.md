@@ -66,7 +66,30 @@ Items 1–4 come first. I do not start item 8 until the page shows its empty and
 
 ## Changes to this plan
 
-_(Filled in as they happen, with the reason.)_
+1. **Stack: published images with branch files mounted, not a source build.** The network
+   here ran at ~1 KB/s to ~250 KB/s and the disk had 4–9 GB free, so a from-source build
+   of `cvat_server` was not practical. I pulled `cvat/server:dev` and `cvat/ui:dev`, and first
+   checked that `cvat/settings/base.py`, `cvat/urls.py`, `cvat/asgi.py`, `engine/models.py`,
+   `engine/permissions.py`, `iam/permissions.py` and `dataset_manager/task.py` inside the image
+   are byte-identical to `8d7ae75`. I then bind-mounted only the files this branch changes into
+   every service built from that image, plus the locally built `cvat-ui/dist` into `cvat_ui`.
+   The compose override that does this lives outside the repo. `docker compose -f docker-compose.yml
+   -f docker-compose.dev.yml up -d --build` is the reproducible equivalent. Cost: the image is
+   `linux/amd64` only and runs emulated on this M1, so all timings carry that overhead.
+2. **Data: 1,000 images, not 5,000.** For the same network reason, task #1 holds the first 1,000
+   val2017 images by file name (7,204 COCO objects). I pulled `instances_val2017.json` out of the
+   remote zip with HTTP range requests (6.5 MB instead of 241 MB) and filtered it to those images
+   before importing it as COCO 1.0.
+3. **Item 5 moved into item 1.** CVAT's `PolicyEnforcer` asserts that every view has an
+   `iam_permission_class`, so the endpoint could not exist without its permission. Item 5 became
+   showing the evidence.
+4. **The endpoint counts CVAT shapes, not COCO objects.** The import produced 8,109 shapes from
+   7,204 objects. CVAT stores each part of a multi-part COCO polygon as its own `LabeledShape`
+   (8,022 polygon parts + 87 crowd masks = 8,109, checked against the JSON), and `group` does not
+   rebuild the original objects (6,557 ungrouped + 57 groups ≠ 7,117). I kept shape counts. They are
+   what an annotator sees and edits in the job, and they match the database exactly.
+5. **MO-1 measured with a session cookie, not Basic auth.** Changed before measuring, for the
+   reason given in `objectives.md`.
 
 ## Decision record
 
