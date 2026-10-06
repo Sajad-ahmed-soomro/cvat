@@ -16,6 +16,7 @@ import Title from 'antd/lib/typography/Title';
 import GoBackButton from 'components/common/go-back-button';
 import CVATLoadingSpinner from 'components/common/loading-spinner';
 import LabelCountsChart from './label-counts-chart';
+import LabelCountsTable from './label-counts-table';
 import { TaskLabelCounts, fetchTaskLabelCounts } from './label-counts-api';
 
 function LabelCountsPage(): JSX.Element {
@@ -67,6 +68,7 @@ function LabelCountsPage(): JSX.Element {
                     {`${counts.total} annotations across ${counts.labels.length} labels`}
                 </Text>
                 <LabelCountsChart labels={counts.labels} />
+                <LabelCountsTable labels={counts.labels} />
             </>
         );
     }

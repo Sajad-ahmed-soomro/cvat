@@ -11,6 +11,7 @@ export interface LabelCount {
     name: string;
     color: string;
     count: number;
+    count_by_kind: Record<string, number>;
 }
 
 export interface TaskLabelCounts {
