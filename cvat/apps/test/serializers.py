@@ -12,7 +12,10 @@ class LabelCountSerializer(serializers.Serializer):
     count = serializers.IntegerField()
     count_by_kind = serializers.DictField(
         child=serializers.IntegerField(),
-        help_text="Counts split by shape type, plus 'track' and 'tag'. Kinds with no annotations are omitted.",
+        help_text=(
+            "Counts split by shape type, plus 'track' and 'tag'. "
+            "Kinds with no annotations are omitted."
+        ),
     )
 
 

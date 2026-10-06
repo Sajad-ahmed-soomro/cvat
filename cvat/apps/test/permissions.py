@@ -17,8 +17,4 @@ class LabelCountsPermission(TaskPermission):
         if obj is None:
             return []
 
-        return [
-            cls.create_base_perm(
-                request, view, cls.Scopes.VIEW_ANNOTATIONS, iam_context, obj
-            )
-        ]
+        return [cls.create_base_perm(request, view, cls.Scopes.VIEW_ANNOTATIONS, iam_context, obj)]
