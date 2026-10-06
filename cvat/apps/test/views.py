@@ -10,8 +10,9 @@ from rest_framework.response import Response
 from cvat.apps.engine.models import Task
 
 from .counts import count_annotations_per_label
+from .live import issue_ticket
 from .permissions import LabelCountsPermission
-from .serializers import TaskLabelCountsSerializer
+from .serializers import LiveTicketSerializer, TaskLabelCountsSerializer
 
 
 @extend_schema(tags=["test"])
@@ -37,3 +38,12 @@ class TaskLabelCountsViewSet(viewsets.GenericViewSet):
             }
         )
         return Response(serializer.data)
+
+    @extend_schema(
+        summary="Get a ticket for the WebSocket that reports changes to the task",
+        responses=LiveTicketSerializer,
+    )
+    @action(detail=True, methods=["GET"], url_path="label-counts/live-ticket")
+    def live_ticket(self, request, pk):
+        task = self.get_object()
+        return Response(LiveTicketSerializer({"ticket": issue_ticket(task.id)}).data)

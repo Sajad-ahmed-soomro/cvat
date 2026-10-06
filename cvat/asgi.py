@@ -39,3 +39,8 @@ if debug.is_debugging_enabled():
             return await super().handle(*args, **kwargs)
 
     application = DebuggerApp()
+
+
+from cvat.apps.test.live import with_live_label_counts  # noqa: E402 (needs Django set up)
+
+application = with_live_label_counts(application)

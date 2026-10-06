@@ -20,3 +20,9 @@ class TaskLabelCountsSerializer(serializers.Serializer):
     task_id = serializers.IntegerField()
     total = serializers.IntegerField()
     labels = LabelCountSerializer(many=True)
+
+
+class LiveTicketSerializer(serializers.Serializer):
+    ticket = serializers.CharField(
+        help_text="Pass as ?ticket= when opening the live label counts WebSocket. Valid for 60 s."
+    )
