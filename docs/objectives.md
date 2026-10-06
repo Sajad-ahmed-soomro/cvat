@@ -46,6 +46,22 @@ run 5: n=50 min=24.3 p50=25.3 p95=26.9 max=32.2 ms
 **Target met:** 29.7 ms against 150 ms. The baseline runs used 10 requests each, not 50,
 because each takes close to a second. With n=10 the "p95" is the slowest request of the run.
 
+**Re-measured on the final code** (after item 7 added the shape type to the `GROUP BY`, and after
+the WebSocket signal receiver was added), same method, 2026-10-06 18:11 UTC:
+[`evidence/mo1-label-counts-latency-final.txt`](evidence/mo1-label-counts-latency-final.txt).
+
+```
+response bytes: 7157
+run 1: n=50 min=25.2 p50=26.1 p95=27.8 max=29.5 ms
+run 2: n=50 min=24.7 p50=25.9 p95=27.5 max=78.8 ms
+run 3: n=50 min=24.3 p50=25.8 p95=27.2 max=34.9 ms
+run 4: n=50 min=25.1 p50=26.2 p95=27.5 max=29.9 ms
+run 5: n=50 min=25.2 p50=26.0 p95=27.6 max=30.4 ms
+```
+
+Median p95 **27.5 ms** (spread 27.2 – 27.8 ms), median p50 26.0 ms. The per-kind split cost nothing
+measurable. The difference from the first measurement is within run-to-run noise. Target still met.
+
 **What the result does and does not say.** The target was set against the baseline, and on that
 comparison it holds: about 35× faster at p95 and about 1,000× less data. But I cleared my own number by
 5×, which means 150 ms was a loose target for 8,109 shapes. This data set is too small to strain a

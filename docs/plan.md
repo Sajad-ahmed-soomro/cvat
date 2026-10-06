@@ -91,6 +91,39 @@ Items 1–4 come first. I do not start item 8 until the page shows its empty and
 5. **MO-1 measured with a session cookie, not Basic auth.** Changed before measuring, for the
    reason given in `objectives.md`.
 
+6. **Recovery after a server restart is slower than after a dropped connection.** Reconnects back
+   off from 1 s, doubling to 30 s. A dropped connection recovered in 2.3 s, but a `cvat_server`
+   restart took 31 s. The server needs ~25 s to boot under emulation, and by then the backoff has
+   grown, so the page can wait up to one more interval. I kept the 30 s cap and wrote it down rather
+   than tune it late.
+
+**Time.** The plan was committed at 21:51. Image and dataset downloads ran until ~22:50 (the brief
+excludes this). Feature commits run from 22:53 to 23:13, and docs follow. Items 1–10 were all reached,
+well inside the 8 h budget. The code was written while the downloads ran and committed only once it
+had been seen working against the stack, which is why the commits are close together.
+
 ## Decision record
 
-_(Written when item 10 is reached.)_
+**Taken: count in Postgres, in a separate app, over CVAT's annotation tables.**
+`count_annotations_per_label` (`cvat/apps/test/counts.py`) runs one `GROUP BY label_id[, type]`
+each over `LabeledShape`, `LabeledTrack` and `LabeledImage`, filtered to the task's annotation jobs.
+Result: 27.5 ms p95 and 7 KB for 8,109 shapes.
+
+**Rejected: reuse CVAT's own annotation pipeline and count the result.** Load the task through
+`dataset_manager` (what `GET /api/tasks/{id}/annotations` does) and count labels in Python. That keeps
+one source of truth for what an annotation is. Measured the same way, it is 1,041 ms p95 and 4.35 MB,
+growing with every point of every polygon, and the page refetches on every change.
+
+**What rejecting it cost.** My query repeats rules the engine owns, outside the engine: which job
+types count, that skeleton elements have a parent, that a track is one row. If CVAT changes how
+annotations are stored (a new annotation table, a new job type, a change to how imports split
+polygons), the counts go wrong without any error. The engine's tests would not catch it, because
+nothing in the engine knows this query exists. I also cannot answer "how many boxes are visible per
+frame" for tracks, which only the engine's interpolation knows.
+
+**Also rejected: Django Channels for the WebSocket.** It is the standard answer, but it is not
+installed. Adding it means a new dependency and channel layer in a server image I could not
+rebuild over this network. **Cost:** I own a small hand-written ASGI router (`cvat/apps/test/live.py`)
+and an edit to `cvat/asgi.py` outside the app, plus a custom signed-ticket scheme instead of
+Channels' session middleware. That is more code of mine to get right, and none of Channels' tested
+handling.
